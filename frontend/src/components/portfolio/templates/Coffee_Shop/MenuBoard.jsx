@@ -364,7 +364,7 @@ export default function MenuBoard({ data }) {
                       return (
                         <div 
                           key={item.id}
-                          className="border border-[#2b3b34] bg-[#1a2320]/90 hover:border-amber-450 hover:bg-[#202c27] p-5 rounded-xl transition-all duration-300 flex flex-col justify-between group shadow-lg"
+                          className="border border-[#2b3b34] bg-[#1a2320]/90 hover:border-amber-500 hover:bg-[#202c27] p-5 rounded-xl transition-all duration-300 flex flex-col justify-between group shadow-lg"
                         >
                           <div>
                             <div className="flex justify-between items-start gap-2 mb-2">
