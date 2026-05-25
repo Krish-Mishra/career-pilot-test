@@ -69,6 +69,17 @@ export default function F1Hero({ data }) {
   // Reference for telemetry loops
   const requestRef = useRef();
   const previousTimeRef = useRef();
+  // Ref to track the speed burst interval for cleanup
+  const speedBurstRef = useRef(null);
+
+  // Cleanup speed burst interval on component unmount
+  useEffect(() => {
+    return () => {
+      if (speedBurstRef.current) {
+        clearInterval(speedBurstRef.current);
+      }
+    };
+  }, []);
 
   // Trigger grid lights sequence
   useEffect(() => {
@@ -95,6 +106,11 @@ export default function F1Hero({ data }) {
 
   // Restart lights sequence
   const restartSequence = () => {
+    // Clear any running speed burst interval before restarting
+    if (speedBurstRef.current) {
+      clearInterval(speedBurstRef.current);
+      speedBurstRef.current = null;
+    }
     setLightCount(0);
     setLightsOut(false);
     setIsRaceStarted(false);
@@ -102,6 +118,8 @@ export default function F1Hero({ data }) {
     setGear('N');
     setRpm(0);
     setDrsActive(false);
+    // Reset lap timer to 00:00.00 on restart
+    setLapTime({ min: 0, sec: 0, ms: 0 });
     // Restarting the starting lights trigger
     setTimeout(() => setLightCount(1), 100);
   };
@@ -109,11 +127,13 @@ export default function F1Hero({ data }) {
   // Speed burst animation on lights out
   const triggerSpeedBurst = () => {
     let currentSpeed = 0;
-    const accelInterval = setInterval(() => {
+    // Store interval in ref so it can be cleared on unmount or restart
+    speedBurstRef.current = setInterval(() => {
       currentSpeed += Math.floor(Math.random() * 25) + 10;
       if (currentSpeed >= 320) {
         currentSpeed = 320 + Math.floor(Math.random() * 25);
-        clearInterval(accelInterval);
+        clearInterval(speedBurstRef.current);
+        speedBurstRef.current = null;
       }
       setSpeed(currentSpeed);
       // Simulate RPM and Gear shifting
@@ -352,27 +372,29 @@ export default function F1Hero({ data }) {
               </a>
             </div>
 
-            {/* Social Channels / Pit Lane Connections */}
-            <div className="flex items-center gap-6 pt-4 text-neutral-500 text-xs font-mono">
-              <span className="uppercase tracking-wider">Pit Lane Links:</span>
-              <div className="flex gap-4">
-                {profile.socials.github && (
-                  <a href={profile.socials.github} target="_blank" rel="noopener noreferrer" className="hover:text-white text-neutral-400 transition-colors">
-                    <Github className="w-4.5 h-4.5" />
-                  </a>
-                )}
-                {profile.socials.linkedin && (
-                  <a href={profile.socials.linkedin} target="_blank" rel="noopener noreferrer" className="hover:text-white text-neutral-400 transition-colors">
-                    <Linkedin className="w-4.5 h-4.5" />
-                  </a>
-                )}
-                {profile.socials.twitter && (
-                  <a href={profile.socials.twitter} target="_blank" rel="noopener noreferrer" className="hover:text-white text-neutral-400 transition-colors">
-                    <Twitter className="w-4.5 h-4.5" />
-                  </a>
-                )}
+            {/* Social Channels / Pit Lane Connections - guarded against missing socials */}
+            {profile.socials && (
+              <div className="flex items-center gap-6 pt-4 text-neutral-500 text-xs font-mono">
+                <span className="uppercase tracking-wider">Pit Lane Links:</span>
+                <div className="flex gap-4">
+                  {profile.socials?.github && (
+                    <a href={profile.socials.github} target="_blank" rel="noopener noreferrer" className="hover:text-white text-neutral-400 transition-colors">
+                      <Github className="w-4.5 h-4.5" />
+                    </a>
+                  )}
+                  {profile.socials?.linkedin && (
+                    <a href={profile.socials.linkedin} target="_blank" rel="noopener noreferrer" className="hover:text-white text-neutral-400 transition-colors">
+                      <Linkedin className="w-4.5 h-4.5" />
+                    </a>
+                  )}
+                  {profile.socials?.twitter && (
+                    <a href={profile.socials.twitter} target="_blank" rel="noopener noreferrer" className="hover:text-white text-neutral-400 transition-colors">
+                      <Twitter className="w-4.5 h-4.5" />
+                    </a>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
           </div>
 
